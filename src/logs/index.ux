@@ -1,0 +1,62 @@
+
+<template>
+  <div class="history">
+    <text class="text">历史记录</text>
+    <block for="(index,item) in history">
+      <text class="text">{{item.date}}获胜{{item.num}}次</text>
+    </block>
+  </div>  
+</template>
+<style>
+
+.history {
+  flex-direction: column;
+  margin-top: 40px;
+  text-align: center;
+}
+
+.text {
+  text-align: center;
+  margin-top: 30px;
+}
+</style>
+<script>
+import storage from '@system.storage'
+module.exports={
+  data: {
+    //历史记录
+    history:[],
+  },
+  onInit: function () {
+      var that=this;
+      storage.get({
+        key: 'dates',
+        success: function (data) {
+          var datas=data.split("/");
+          for(let date of datas){
+            storage.get({
+              key: date,
+              success: function (data) {
+                that.history.unshift({"date":date,"num":data});
+              }
+            })
+          }
+          
+          // for(var i=0; i<datas.length; i++){
+          //   (function(){
+          //     var tempDate=datas[i];
+          //     storage.get({
+          //       key: tempDate,
+          //       success: function (data) {
+          //         that.history.unshift({"date":tempDate,"num":data});
+          //         console.log(tempDate);
+          //       }
+          //     })
+          //   })()
+          // }  
+        }
+      })
+  },
+}  
+</script>
+  

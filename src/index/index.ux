@@ -1,0 +1,287 @@
+
+<template>
+<div class="container">
+  <div class="downView">
+    <text class="winNum" style="padding-bottom: 40px;">你今天已经获胜了{{winNum}}次</text>
+    <div class="showView">
+      <image class="gesturesImgL" src="{{imageAiScr}}"></image>
+      <text class="winOrLost">{{gameOfPlay}}</text>
+      <image class="gesturesImgR" src="{{imageUserScr}}"></image>
+    </div>
+    <div class="chooseForUserView">
+      <text class="winNum" style="padding-top:40px;">出拳吧，少年~</text>
+      <div class="choose-V">
+        <block for="(index,item) in srcs">
+          <div class="choose-view" id="{{index}}" onclick="changeForChoose">
+            <image class="choose-image" src="{{item}}"></image>
+          </div>
+        </block>
+      </div>
+      <input class="againBtn" onclick="again" type="button" value="再来一次"></input>
+      <input class="see-more" onclick="toHistory" type="button" value="查看历史记录"></input>
+    </div>
+  </div>
+</div>
+</template>
+<style>
+
+.container{
+  background-color: rgb(188, 214, 238);
+}
+
+.downView {
+  flex-direction: column;
+  width: 100%;
+  height: 1250px;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+.winNum {
+  display: flex;
+  font-size: 30px;
+  color: #363527;
+  font-weight: 500;
+}
+
+.showView {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  margin-top: 30px;
+  height: 200px;
+}
+
+.gesturesImgL {
+  height: 180px;
+  width: 180px;
+  margin-left: 80px;
+}
+
+.gesturesImgR {
+  height: 180px;
+  width: 180px;
+  margin-right: 80px;
+}
+
+.winOrLost {
+  color:rgb(197, 141, 20) ;
+  flex: 1;
+  font-size: 30px;
+  text-align: center;
+}
+
+.chooseForUserView {
+  flex-direction: column;
+  margin: 40px;
+  height: 800px;
+  text-align: center;
+  align-items: center;
+  background-color: #f0f8ff;
+}
+
+.choose-V {
+  display: flex;
+  flex-direction: row;
+}
+
+.choose-view {
+  flex: 1;
+  height: 160px;
+  width: 160px;
+  margin:30px;
+}
+
+.choose-image {
+  height: 160px;
+  width: 160px;
+  border-radius: 80px;
+}
+
+.againBtn {
+  width: 460px;
+  height: 100px;
+  margin-top: 40px;
+  background-color: rgb(241, 202, 92);
+  border-radius: 5px;
+}
+
+.history {
+  margin-top: 40px;
+}
+
+.see-more {
+  margin-top: 200px;
+  font-size: 30px;
+  background-color: #f0f8ff;
+}
+</style>
+<script>
+import storage from '@system.storage'
+import router from '@system.router';
+var numAi = 0;
+var timer;
+var year=new Date().getFullYear();
+var month=new Date().getMonth();
+var day=new Date().getDate();
+var date=year+"年"+(month+1)+"月"+day+"日";
+module.exports={
+  data: {
+
+    //控制按钮是否可点击
+    btnState: false,
+
+    //记录获胜次数
+    winNum: 0,
+
+    //中间的话“Ho~ You Win”
+    gameOfPlay: '',
+
+    //用户选择的图片
+    imageUserScr: '/index/image/Avatar.jpg',
+
+    //电脑随机的图片
+    imageAiScr: '',
+
+    //石头剪刀布图片数组
+    srcs: ['/index/image/shitou.png', '/index/image/jiandao.png', '/index/image/bu.png'],
+  },
+
+  //生命周期，刚进来
+  onInit: function () {
+    //获取本地缓存“已经获胜的次数”
+    var that=this;
+    storage.get({
+      key: "dates",
+      success:function(data){
+        var isExist=false;
+        var dates=data.split("/");
+        for(var tempValue of dates ){
+          if(tempValue===date){
+            isExist=true;
+            storage.get({
+              key: tempValue,
+              success: function (data) {
+                that.winNum=data; 
+              }
+            })
+          }
+        }
+        if(!isExist){
+          storage.set({
+            key: date,
+            value: 0,
+            success: function (data) {
+              console.log("handling success");
+            }
+          });
+          storage.set({
+            key: 'dates',
+            value: data+"/"+date,
+            success: function (data) {
+              console.log("handling success");
+            }
+          })
+        }
+      }
+    })
+    this.timerGo();
+  },
+
+  //点击按钮
+  changeForChoose(e) {
+    if (this.btnState === true) {
+      return;
+    }
+
+    //获取数组中用户的，石头剪刀布相应的图片。
+      this.imageUserScr= this.srcs[e.target.id]
+    //清除计时器
+    clearInterval(timer);
+
+    //获取数据源
+    var user = this.imageUserScr;
+    var ai = this.imageAiScr;
+    var num = this.winNum;
+    var str = 'You Lost!';
+    //判断是否获胜
+    if (user === "/index/image/shitou.png" && ai === "/index/image/jiandao.png") {
+      //获胜后增加次数、改变文字内容、重新缓存获胜次数
+      num++;
+      str = 'You Win!';
+      storage.set({
+                key: date,
+                value: num,
+                success:function(data){console.log("handling success");}
+              })
+    }
+    if (user === "/index/image/jiandao.png" && ai === "/index/image/bu.png") {
+      num++;
+      str = 'You Win!';
+      storage.set({
+                key: date,
+                value: num,
+                success:function(data){console.log("handling success");}
+              })
+    }
+    if (user === "/index/image/bu.png" && ai === "/index/image/shitou.png") {
+      num++;
+      str = 'You Win!';
+      storage.set({
+                key: date,
+                value: num,
+                success:function(data){console.log("handling success");}
+              })
+    }
+
+    //如果平局
+    if (user === ai) {
+      str = 'Game Draw!';
+    }
+
+    //刷新数据    
+    this.winNum= num;
+    this.gameOfPlay= str;
+    this.btnState= true;
+    
+  },
+
+  //开启计时器
+  timerGo() {
+    timer = setInterval(this.move.bind(this), 100);
+  },
+
+  //ai滚动方法
+  move() {
+    //如果大于等于3，重置
+    if (numAi >= 3) {
+      numAi = 0;
+    }
+    //获取数组中Ai的，石头剪刀布相应的图片。
+    this.imageAiScr= this.srcs[numAi]
+    numAi++;
+  },
+
+  again() {
+    //控制按钮
+    if (this.btnState === false) {
+      return;
+    }
+    //从新开始计时器
+    this.timerGo();
+    //刷新数据    
+    this.btnState=false;
+    this.gameOfPlay= '';
+    this.imageUserScr= '/index/image/Avatar.jpg';
+    
+  },
+
+  toHistory(){
+    router.push({
+      uri: '/logs'
+    })
+  }
+}
+</script>
+  

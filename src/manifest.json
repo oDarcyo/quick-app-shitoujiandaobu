@@ -1,0 +1,47 @@
+{
+  "package": "com.company.shitoujiandaobu",
+  "name": "石头剪刀布",
+  "versionName": "1.0.2",
+  "versionCode": 3,
+  "icon": "/Common/logo.png",
+  "minPlatformVersion": 1000,
+  "features": [
+    {
+      "name":"system.storage"
+    },
+    {
+      "name":"system.router"
+    }
+  ],
+  "permissions": [
+    { "origin": "*" }
+  ],
+  "config": {
+    "logLevel": "log"
+  },
+  "router": {
+    "entry": "index",
+    "pages": {
+      "index": {
+        "component": "index",
+        "path": "/"
+      },
+      "logs": {
+        "component": "index"
+      }
+    }
+  },
+  "display": {
+    "backgroundColor": "#ffffff",
+  
+    "titleBarText": "石头剪刀布",
+    "titleBarBackgroundColor": "rgb(188, 214, 238)",
+    "titleBarTextColor": "#ffffff",
+    "menu":false,
+    "pages": {
+      "Hello": {
+        "titleBarText": "石头剪刀布"
+      }
+    }
+  }
+}
